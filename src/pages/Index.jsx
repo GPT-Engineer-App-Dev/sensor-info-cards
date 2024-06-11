@@ -1,19 +1,61 @@
-// Update this page (the content is just a fallback if you fail and example)
-// Use chakra-ui
-import { Container, Text, VStack } from "@chakra-ui/react";
+import { useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Box, Text, VStack } from '@chakra-ui/react';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-// Example of using react-icons
-// import { FaRocket } from "react-icons/fa";
-// <IconButton aria-label="Add" icon={<FaRocket />} size="lg" />; // IconButton would also have to be imported from chakra
+// Dummy data for buildings
+const buildings = [
+  { id: 1, position: [59.911491, 10.757933], sensorData: 'Temperature: 20°C, Humidity: 30%' },
+  { id: 2, position: [59.913868, 10.752245], sensorData: 'Temperature: 19°C, Humidity: 35%' },
+  { id: 3, position: [59.914501, 10.733167], sensorData: 'Temperature: 21°C, Humidity: 28%' },
+  // Add more buildings as needed
+];
+
+// Custom icon for the markers
+const pinIcon = new L.Icon({
+  iconUrl: require('../assets/pin-icon.png'),
+  iconRetinaUrl: require('../assets/pin-icon.png'),
+  iconSize: [35, 35],
+  iconAnchor: [17, 35],
+  popupAnchor: [0, -35],
+});
 
 const Index = () => {
+  const [activeBuilding, setActiveBuilding] = useState(null);
+
   return (
-    <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-      <VStack spacing={4}>
-        <Text fontSize="2xl">Your Blank Canvas</Text>
-        <Text>Chat with the agent to start making edits.</Text>
-      </VStack>
-    </Container>
+    <MapContainer center={[59.9139, 10.7522]} zoom={13} style={{ height: '100vh', width: '100%' }}>
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      />
+      {buildings.map(building => (
+        <Marker
+          key={building.id}
+          position={building.position}
+          icon={pinIcon}
+          eventHandlers={{
+            click: () => {
+              setActiveBuilding(building);
+            },
+          }}
+        />
+      ))}
+      {activeBuilding && (
+        <Popup
+          position={activeBuilding.position}
+          onClose={() => {
+            setActiveBuilding(null);
+          }}
+        >
+          <VStack>
+            <Text fontWeight="bold">Building Information</Text>
+            <Text>{activeBuilding.sensorData}</Text>
+          </VStack>
+        </Popup>
+      )}
+    </MapContainer>
   );
 };
 
